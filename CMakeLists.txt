@@ -1,0 +1,5 @@
+cmake_minimum_required (VERSION 3.10)
+project (MiniComputer)
+set (source_dir "${PROJECT_SOURCE_DIR}/src/")
+file (GLOB source_files "${source_dir}/*.cpp")
+add_executable (MiniComputer ${source_files})
