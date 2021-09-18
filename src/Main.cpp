@@ -59,6 +59,8 @@ class Circuit {
         vector<bool> staticValues;
 
     public:
+        Circuit() {}
+
         Circuit(LogicGate inputGate, vector<Circuit*> inputParents) {
             gate = inputGate;
             parents = inputParents;
@@ -125,105 +127,74 @@ class CompoundCircuit {
         Circuit * getOutput(int nb) {
             return components[components.size() - nbOutputs + nb];
         }
+};
 
+class Adder {
+    private:
+        Circuit * input_ptr0;
+        Circuit * input_ptr1;
+        Circuit * input_ptr2;
+
+        Circuit firstXorGate;
+        Circuit secondXorGate;
+
+        Circuit firstAndGate;
+        Circuit secondAndGate; 
+        
+        Circuit firstOrGate;
+
+        Circuit output0;
+        Circuit output1;        
+    
+    public:
+        Adder() {}
+
+        Adder(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
+            input_ptr0 = input_input0;
+            input_ptr1 = input_input1;
+            input_ptr2 = input_input2;
+
+            firstXorGate = Circuit(xor_Gate, vector<Circuit*>{input_ptr0, input_ptr1});
+            secondXorGate = Circuit(xor_Gate, vector<Circuit*>{&firstXorGate, input_ptr2});
+
+            firstAndGate = Circuit(and_Gate, vector<Circuit*>{input_ptr0, input_ptr1});
+            secondAndGate = Circuit(and_Gate, vector<Circuit*>{&firstXorGate, input_ptr2}); 
+            
+            firstOrGate = Circuit(or_Gate, vector<Circuit*>{&firstAndGate, &secondAndGate});
+
+            output0 = Circuit(yes_Gate, vector<Circuit*>{&secondXorGate});
+            output1 = Circuit(yes_Gate, vector<Circuit*>{&firstOrGate});   
+        }
+
+        Circuit * getOutput(int nb) {
+            if (nb == 0) return &output0;
+            else if (nb == 1) return &output1;
+            else {
+                throw std::invalid_argument("possible inputs: 0 or 1");
+            }
+        }
 };
 
 int main() {
     Circuit system_input0(yes_Gate, vector<bool>{0});
     Circuit system_input1(yes_Gate, vector<bool>{0});
-    Circuit system_input2(yes_Gate, vector<bool>{0});
+    Circuit system_input2(yes_Gate, vector<bool>{1});
     Circuit system_input3(yes_Gate, vector<bool>{1});
 
     Circuit system_input4(yes_Gate, vector<bool>{1});
-    Circuit system_input5(yes_Gate, vector<bool>{0});
-    Circuit system_input6(yes_Gate, vector<bool>{0});
-    Circuit system_input7(yes_Gate, vector<bool>{1});
+    Circuit system_input5(yes_Gate, vector<bool>{1});
+    Circuit system_input6(yes_Gate, vector<bool>{1});
+    Circuit system_input7(yes_Gate, vector<bool>{0});
 
     Circuit system_input8(yes_Gate, vector<bool>{0});
 
-        //first adder
-    
-    // Circuit input0_0(yes_Gate, vector<bool>{0});
-    // Circuit input1_0(yes_Gate, vector<bool>{0});
-    // Circuit input2_0(yes_Gate, vector<bool>{0});
+    Adder miniAdder0(&system_input3, &system_input7, &system_input8);
 
-    Circuit firstXorGate_0(xor_Gate, vector<Circuit*>{&system_input3, &system_input7});
-    Circuit secondXorGate_0(xor_Gate, vector<Circuit*>{&firstXorGate_0, &system_input8});
+    Adder miniAdder1(&system_input2, &system_input6, miniAdder0.getOutput(1));
 
-    Circuit firstAndGate_0(and_Gate, vector<Circuit*>{&system_input3, &system_input7});
-    Circuit secondAndGate_0(and_Gate, vector<Circuit*>{&firstXorGate_0, &system_input8}); 
-    
-    Circuit firstOrGate_0(or_Gate, vector<Circuit*>{&firstAndGate_0, &secondAndGate_0});
+    Adder miniAdder2(&system_input1, &system_input5, miniAdder1.getOutput(1));
 
-    Circuit output0_0(yes_Gate, vector<Circuit*>{&secondXorGate_0});
-    Circuit output1_0(yes_Gate, vector<Circuit*>{&firstOrGate_0});
-
-    vector<Circuit*> circuits0{&system_input3, &system_input7, &system_input8, &firstXorGate_0, &secondXorGate_0, &firstAndGate_0, &secondAndGate_0, &firstOrGate_0, &output0_0, &output1_0};
-
-    CompoundCircuit miniAdder0(3, 2, circuits0);
-
-        //second adder
-    
-    // Circuit input0_1(yes_Gate, vector<bool>{0});
-    // Circuit input1_1(yes_Gate, vector<bool>{0});
-    // Circuit input2_1
-
-    Circuit firstXorGate_1(xor_Gate, vector<Circuit*>{&system_input2, &system_input6});
-    Circuit secondXorGate_1(xor_Gate, vector<Circuit*>{&firstXorGate_1, miniAdder0.getOutput(1)});
-
-    Circuit firstAndGate_1(and_Gate, vector<Circuit*>{&system_input2, &system_input6});
-    Circuit secondAndGate_1(and_Gate, vector<Circuit*>{&firstXorGate_1, miniAdder0.getOutput(1)}); 
-    
-    Circuit firstOrGate_1(or_Gate, vector<Circuit*>{&firstAndGate_1, &secondAndGate_1});
-
-    Circuit output0_1(yes_Gate, vector<Circuit*>{&secondXorGate_1});
-    Circuit output1_1(yes_Gate, vector<Circuit*>{&firstOrGate_1});
-
-    vector<Circuit*> circuits1{&system_input2, &system_input6, miniAdder0.getOutput(1), &firstXorGate_1, &secondXorGate_1, &firstAndGate_1, &secondAndGate_1, &firstOrGate_1, &output0_1, &output1_1};
-
-    CompoundCircuit miniAdder1(3, 2, circuits1);
-
-        //third adder
-
-    // Circuit input0_2(yes_Gate, vector<bool>{0});
-    // Circuit input1_2(yes_Gate, vector<bool>{0});
-    // Circuit input2_2(yes_Gate, vector<bool>{0});
-
-    Circuit firstXorGate_2(xor_Gate, vector<Circuit*>{&system_input1, &system_input5});
-    Circuit secondXorGate_2(xor_Gate, vector<Circuit*>{&firstXorGate_2, miniAdder1.getOutput(1)});
-
-    Circuit firstAndGate_2(and_Gate, vector<Circuit*>{&system_input1, &system_input5});
-    Circuit secondAndGate_2(and_Gate, vector<Circuit*>{&firstXorGate_2, miniAdder1.getOutput(1)}); 
-    
-    Circuit firstOrGate_2(or_Gate, vector<Circuit*>{&firstAndGate_2, &secondAndGate_2});
-
-    Circuit output0_2(yes_Gate, vector<Circuit*>{&secondXorGate_2});
-    Circuit output1_2(yes_Gate, vector<Circuit*>{&firstOrGate_2});
-
-    vector<Circuit*> circuits2{&system_input1, &system_input5, miniAdder1.getOutput(1), &firstXorGate_2, &secondXorGate_2, &firstAndGate_2, &secondAndGate_2, &firstOrGate_2, &output0_2, &output1_2};
-
-    CompoundCircuit miniAdder2(3, 2, circuits2);
-
-        //fourth adder
-
-    // Circuit input0_3(yes_Gate, vector<bool>{0});
-    // Circuit input1_3(yes_Gate, vector<bool>{0});
-    // Circuit input2_3(yes_Gate, vector<bool>{0});
-
-    Circuit firstXorGate_3(xor_Gate, vector<Circuit*>{&system_input0, &system_input4});
-    Circuit secondXorGate_3(xor_Gate, vector<Circuit*>{&firstXorGate_3, miniAdder2.getOutput(1)});
-
-    Circuit firstAndGate_3(and_Gate, vector<Circuit*>{&system_input0, &system_input4});
-    Circuit secondAndGate_3(and_Gate, vector<Circuit*>{&firstXorGate_2, miniAdder2.getOutput(1)}); 
-    
-    Circuit firstOrGate_3(or_Gate, vector<Circuit*>{&firstAndGate_2, &secondAndGate_2});
-
-    Circuit output0_3(yes_Gate, vector<Circuit*>{&secondXorGate_2});
-    Circuit output1_3(yes_Gate, vector<Circuit*>{&firstOrGate_2});
-
-    vector<Circuit*> circuits3{&system_input0, &system_input4, miniAdder2.getOutput(1), &firstXorGate_3, &secondXorGate_3, &firstAndGate_3, &secondAndGate_3, &firstOrGate_3, &output0_3, &output1_3};
-
-    CompoundCircuit miniAdder3(3, 2, circuits3);
+    Adder miniAdder3(&system_input0, &system_input4, miniAdder2.getOutput(1));
 
     // system outputs
 
@@ -234,8 +205,5 @@ int main() {
 
     Circuit output4(yes_Gate, vector<Circuit*>{miniAdder3.getOutput(1)}); //overflow 
 
-    std::cout << output0.getOutput() << " " << output1.getOutput() << " " << output2.getOutput() << " " << output3.getOutput() << "   " << output4.getOutput() << endl;
-
-    
-    
+    std::cout << output0.getOutput() << " " << output1.getOutput() << " " << output2.getOutput() << " " << output3.getOutput() << "   " << output4.getOutput() << endl;    
 }
