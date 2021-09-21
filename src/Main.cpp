@@ -11,7 +11,7 @@ class TruthTable {
     public:
         TruthTable() {}
         TruthTable(map<vector<bool>, bool> inputTable) {
-            table = inputTable;    
+            table = inputTable;
         }
 
         bool getValue(vector<bool> input) {
@@ -41,7 +41,6 @@ LogicGate not_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1}, 0}, {v
 
 LogicGate and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 0}, {vector<bool>{0, 1}, 0}, {vector<bool>{0, 0}, 0}}));
 
-
 LogicGate or_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
 
 LogicGate xor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
@@ -60,7 +59,6 @@ class Circuit {
 
     public:
         Circuit() {}
-
         Circuit(LogicGate inputGate, vector<Circuit*> inputParents) {
             gate = inputGate;
             parents = inputParents;
@@ -129,6 +127,13 @@ class CompoundCircuit {
         }
 };
 
+
+// Takes 3 bits as inputs, 2 bits to sum up and a carry bit
+// It outputs 2 bits, the sum and a carry signal.
+// 0-0-0 will output 0-0
+// 1-0-0, 0-1-0 and 0-0-1 will output 1-0
+// 0-1-1, 1-0-1 and 1-1-0 will output 0-1
+// 1-1-1 will output 1-1
 class Adder {
     private:
         Circuit * input_ptr0;
@@ -139,20 +144,21 @@ class Adder {
         Circuit secondXorGate;
 
         Circuit firstAndGate;
-        Circuit secondAndGate; 
-        
+        Circuit secondAndGate;
+
         Circuit firstOrGate;
 
         Circuit output0;
-        Circuit output1;        
+        Circuit output1;
     
     public:
         Adder() {}
 
-        Adder(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
+        void computeOutput(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
             input_ptr0 = input_input0;
             input_ptr1 = input_input1;
             input_ptr2 = input_input2;
+
 
             firstXorGate = Circuit(xor_Gate, vector<Circuit*>{input_ptr0, input_ptr1});
             secondXorGate = Circuit(xor_Gate, vector<Circuit*>{&firstXorGate, input_ptr2});
@@ -162,8 +168,13 @@ class Adder {
             
             firstOrGate = Circuit(or_Gate, vector<Circuit*>{&firstAndGate, &secondAndGate});
 
+
             output0 = Circuit(yes_Gate, vector<Circuit*>{&secondXorGate});
-            output1 = Circuit(yes_Gate, vector<Circuit*>{&firstOrGate});   
+            output1 = Circuit(yes_Gate, vector<Circuit*>{&firstOrGate});
+        }
+
+        Adder(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
+            computeOutput(input_input0, input_input1, input_input2);
         }
 
         Circuit * getOutput(int nb) {
@@ -173,37 +184,118 @@ class Adder {
                 throw std::invalid_argument("possible inputs: 0 or 1");
             }
         }
+
+        void printOutput(int nb) {
+            cout << getOutput(nb)->getOutput() << endl;
+        }
+};
+
+
+// Inputs: 8 or 9 bits
+// First 4 bits represent number A, bits 5-8 represent number B and nit 9 represents optionally a carry
+// Outputs
+class Adder4Bit {
+    private:
+    // Input A: 4 bit number
+        Circuit * inputA0;
+        Circuit * inputA1;
+        Circuit * inputA2;
+        Circuit * inputA3;
+
+    // Input B: 4 bit number
+        Circuit * inputB0;
+        Circuit * inputB1;
+        Circuit * inputB2;
+        Circuit * inputB3;
+
+    //Input C: Carry signal, optional
+        Circuit * inputC;
+        Circuit inputCstatic = Circuit(yes_Gate, vector<bool>{0});
+
+        vector<Adder> adders{};
+
+        bool output0;
+        bool output1;
+        bool output2;
+        bool output3;
+
+        //Overflow bit
+        bool output4;
+
+    public:
+        Adder4Bit() {}
+        Adder4Bit(Circuit * inputA_0,
+                Circuit * inputA_1,
+                Circuit * inputA_2,
+                Circuit * inputA_3,
+                Circuit * inputB_0,
+                Circuit * inputB_1,
+                Circuit * inputB_2,
+                Circuit * inputB_3,
+                Circuit * input_C = nullptr) {
+            inputA0 = inputA_0;
+            inputA1 = inputA_1;
+            inputA2 = inputA_2;
+            inputA3 = inputA_3;
+
+            inputB0 = inputB_0;
+            inputB1 = inputB_1;
+            inputB2 = inputB_2;
+            inputB3 = inputB_3;
+
+            if (input_C == nullptr) {
+                inputC = &inputCstatic;
+            }
+            else {
+                inputC = input_C;
+            }
+
+            Adder adder0 = Adder(inputA3, inputB3, inputC);
+
+            Adder adder1(inputA2, inputB2, adder0.getOutput(1));
+            Adder adder2(inputA1, inputB1, adder1.getOutput(1));
+            Adder adder3(inputA0, inputB0, adder2.getOutput(1));
+
+            adders.push_back(adder0);
+            adders.push_back(adder1);
+            adders.push_back(adder2);
+            adders.push_back(adder3);
+
+            
+            output0 = Circuit(yes_Gate, vector<Circuit*>{adders[3].getOutput(0)}).getOutput();
+            output1 = Circuit(yes_Gate, vector<Circuit*>{adders[2].getOutput(0)}).getOutput();
+            output2 = Circuit(yes_Gate, vector<Circuit*>{adders[1].getOutput(0)}).getOutput();
+            output3 = Circuit(yes_Gate, vector<Circuit*>{adders[0].getOutput(0)}).getOutput();
+
+            output4 = Circuit(yes_Gate, vector<Circuit*>{adder3.getOutput(1)}).getOutput();
+        }
+
+        vector<bool> getResult() {
+            return {output0, output1, output2, output3, output4};
+        }
+
+        void printResults() {
+            vector<bool> outputBits = getResult();
+            cout << outputBits[0] << " " << outputBits[1] << " " << outputBits[2] << " " << outputBits[3] << "  " << outputBits[4] << endl;
+        }
 };
 
 int main() {
-    Circuit system_input0(yes_Gate, vector<bool>{0});
-    Circuit system_input1(yes_Gate, vector<bool>{0});
-    Circuit system_input2(yes_Gate, vector<bool>{1});
-    Circuit system_input3(yes_Gate, vector<bool>{1});
+    //System inputs
+    Circuit sys_input0(yes_Gate, vector<bool>{0});
+    Circuit sys_input1(yes_Gate, vector<bool>{1});
+    Circuit sys_input2(yes_Gate, vector<bool>{1});
+    Circuit sys_input3(yes_Gate, vector<bool>{1});
 
-    Circuit system_input4(yes_Gate, vector<bool>{1});
-    Circuit system_input5(yes_Gate, vector<bool>{1});
-    Circuit system_input6(yes_Gate, vector<bool>{1});
-    Circuit system_input7(yes_Gate, vector<bool>{0});
+    Circuit sys_input4(yes_Gate, vector<bool>{0});
+    Circuit sys_input5(yes_Gate, vector<bool>{0});
+    Circuit sys_input6(yes_Gate, vector<bool>{1});
+    Circuit sys_input7(yes_Gate, vector<bool>{1});
 
-    Circuit system_input8(yes_Gate, vector<bool>{0});
+    Circuit sys_input8(yes_Gate, vector<bool>{0});
 
-    Adder miniAdder0(&system_input3, &system_input7, &system_input8);
+    Adder4Bit bigAdder(&sys_input0, &sys_input1, &sys_input2, &sys_input3, &sys_input4, &sys_input5, &sys_input6, &sys_input7, &sys_input8);
 
-    Adder miniAdder1(&system_input2, &system_input6, miniAdder0.getOutput(1));
-
-    Adder miniAdder2(&system_input1, &system_input5, miniAdder1.getOutput(1));
-
-    Adder miniAdder3(&system_input0, &system_input4, miniAdder2.getOutput(1));
-
-    // system outputs
-
-    Circuit output0(yes_Gate, vector<Circuit*>{miniAdder3.getOutput(0)});
-    Circuit output1(yes_Gate, vector<Circuit*>{miniAdder2.getOutput(0)});
-    Circuit output2(yes_Gate, vector<Circuit*>{miniAdder1.getOutput(0)});
-    Circuit output3(yes_Gate, vector<Circuit*>{miniAdder0.getOutput(0)});
-
-    Circuit output4(yes_Gate, vector<Circuit*>{miniAdder3.getOutput(1)}); //overflow 
-
-    std::cout << output0.getOutput() << " " << output1.getOutput() << " " << output2.getOutput() << " " << output3.getOutput() << "   " << output4.getOutput() << endl;    
+    bigAdder.printResults();
+ 
 }
