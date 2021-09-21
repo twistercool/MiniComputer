@@ -59,6 +59,7 @@ class Circuit {
 
     public:
         Circuit() {}
+
         Circuit(LogicGate inputGate, vector<Circuit*> inputParents) {
             gate = inputGate;
             parents = inputParents;
@@ -214,17 +215,18 @@ class Adder4Bit {
 
         vector<Adder> adders{};
 
-        bool output0;
-        bool output1;
-        bool output2;
-        bool output3;
+        Circuit output0 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit output1 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit output2 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit output3 = Circuit(yes_Gate, vector<bool>{0});
 
         //Overflow bit
-        bool output4;
+        Circuit output4;
 
     public:
         Adder4Bit() {}
-        Adder4Bit(Circuit * inputA_0,
+
+        void computeOutput(Circuit * inputA_0,
                 Circuit * inputA_1,
                 Circuit * inputA_2,
                 Circuit * inputA_3,
@@ -250,8 +252,9 @@ class Adder4Bit {
                 inputC = input_C;
             }
 
-            Adder adder0 = Adder(inputA3, inputB3, inputC);
+            adders = vector<Adder>{};
 
+            Adder adder0(inputA3, inputB3, inputC);
             Adder adder1(inputA2, inputB2, adder0.getOutput(1));
             Adder adder2(inputA1, inputB1, adder1.getOutput(1));
             Adder adder3(inputA0, inputB0, adder2.getOutput(1));
@@ -261,22 +264,35 @@ class Adder4Bit {
             adders.push_back(adder2);
             adders.push_back(adder3);
 
+            output0.changeValues(vector<bool>{adders[3].getOutput(0)->getOutput()});
+            output1.changeValues(vector<bool>{adders[2].getOutput(0)->getOutput()});
+            output2.changeValues(vector<bool>{adders[1].getOutput(0)->getOutput()});
+            output3.changeValues(vector<bool>{adders[0].getOutput(0)->getOutput()});
             
-            output0 = Circuit(yes_Gate, vector<Circuit*>{adders[3].getOutput(0)}).getOutput();
-            output1 = Circuit(yes_Gate, vector<Circuit*>{adders[2].getOutput(0)}).getOutput();
-            output2 = Circuit(yes_Gate, vector<Circuit*>{adders[1].getOutput(0)}).getOutput();
-            output3 = Circuit(yes_Gate, vector<Circuit*>{adders[0].getOutput(0)}).getOutput();
-
-            output4 = Circuit(yes_Gate, vector<Circuit*>{adder3.getOutput(1)}).getOutput();
+            output4.changeValues(vector<bool>{adders[3].getOutput(1)->getOutput()});
         }
 
-        vector<bool> getResult() {
-            return {output0, output1, output2, output3, output4};
+        Adder4Bit(Circuit * inputA_0,
+                Circuit * inputA_1,
+                Circuit * inputA_2,
+                Circuit * inputA_3,
+                Circuit * inputB_0,
+                Circuit * inputB_1,
+                Circuit * inputB_2,
+                Circuit * inputB_3,
+                Circuit * input_C = nullptr) {
+            computeOutput(inputA_0, inputA_1, inputA_2, inputA_3, inputB_0, inputB_1, inputB_2, inputB_3, input_C);
+        }
+
+        vector<Circuit*> getResult() {
+            return {&output0, &output1, &output2, &output3, &output4};
         }
 
         void printResults() {
-            vector<bool> outputBits = getResult();
-            cout << outputBits[0] << " " << outputBits[1] << " " << outputBits[2] << " " << outputBits[3] << "  " << outputBits[4] << endl;
+            vector<Circuit*> outputBits = getResult();
+            cout << outputBits[0]->getOutput() << " " << outputBits[1]->getOutput() 
+                << " " << outputBits[2]->getOutput() << " " << outputBits[3]->getOutput()
+                << "  " << outputBits[4]->getOutput() << endl;
         }
 };
 
