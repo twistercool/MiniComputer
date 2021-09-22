@@ -52,7 +52,7 @@ LogicGate nand_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}
 LogicGate xnor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
 
 class Circuit {
-    public:
+    private:
         LogicGate gate;
         vector<Circuit*> parents;
         vector<bool> staticValues;
@@ -136,7 +136,7 @@ class CompoundCircuit {
 // 0-1-1, 1-0-1 and 1-1-0 will output 0-1
 // 1-1-1 will output 1-1
 class Adder {
-    public:
+    private:
         Circuit * input_ptr0;
         Circuit * input_ptr1;
         Circuit * input_ptr2;
