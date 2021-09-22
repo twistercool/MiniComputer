@@ -52,7 +52,7 @@ LogicGate nand_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}
 LogicGate xnor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
 
 class Circuit {
-    private:
+    public:
         LogicGate gate;
         vector<Circuit*> parents;
         vector<bool> staticValues;
@@ -136,7 +136,7 @@ class CompoundCircuit {
 // 0-1-1, 1-0-1 and 1-1-0 will output 0-1
 // 1-1-1 will output 1-1
 class Adder {
-    private:
+    public:
         Circuit * input_ptr0;
         Circuit * input_ptr1;
         Circuit * input_ptr2;
@@ -153,8 +153,6 @@ class Adder {
         Circuit output1;
     
     public:
-        Adder() {}
-
         void computeOutput(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
             input_ptr0 = input_input0;
             input_ptr1 = input_input1;
@@ -172,6 +170,10 @@ class Adder {
 
             output0 = Circuit(yes_Gate, vector<Circuit*>{&secondXorGate});
             output1 = Circuit(yes_Gate, vector<Circuit*>{&firstOrGate});
+        }
+
+        Adder() {
+            computeOutput(nullptr, nullptr, nullptr);
         }
 
         Adder(Circuit * input_input0, Circuit * input_input1, Circuit * input_input2) {
@@ -213,7 +215,10 @@ class Adder4Bit {
         Circuit * inputC;
         Circuit inputCstatic = Circuit(yes_Gate, vector<bool>{0});
 
-        vector<Adder> adders{};
+        Adder adder0;
+        Adder adder1;
+        Adder adder2;
+        Adder adder3;
 
         Circuit output0 = Circuit(yes_Gate, vector<bool>{0});
         Circuit output1 = Circuit(yes_Gate, vector<bool>{0});
@@ -252,24 +257,18 @@ class Adder4Bit {
                 inputC = input_C;
             }
 
-            adders = vector<Adder>{};
+            adder0.computeOutput(inputA3, inputB3, inputC);
+            adder1.computeOutput(inputA2, inputB2, adder0.getOutput(1));
+            adder2.computeOutput(inputA1, inputB1, adder1.getOutput(1));
+            adder3.computeOutput(inputA0, inputB0, adder2.getOutput(1));
 
-            Adder adder0(inputA3, inputB3, inputC);
-            Adder adder1(inputA2, inputB2, adder0.getOutput(1));
-            Adder adder2(inputA1, inputB1, adder1.getOutput(1));
-            Adder adder3(inputA0, inputB0, adder2.getOutput(1));
 
-            adders.push_back(adder0);
-            adders.push_back(adder1);
-            adders.push_back(adder2);
-            adders.push_back(adder3);
+            output0.changeValues(vector<bool>{adder3.getOutput(0)->getOutput()});
+            output1.changeValues(vector<bool>{adder2.getOutput(0)->getOutput()});
+            output2.changeValues(vector<bool>{adder1.getOutput(0)->getOutput()});
+            output3.changeValues(vector<bool>{adder0.getOutput(0)->getOutput()});
 
-            output0.changeValues(vector<bool>{adders[3].getOutput(0)->getOutput()});
-            output1.changeValues(vector<bool>{adders[2].getOutput(0)->getOutput()});
-            output2.changeValues(vector<bool>{adders[1].getOutput(0)->getOutput()});
-            output3.changeValues(vector<bool>{adders[0].getOutput(0)->getOutput()});
-            
-            output4.changeValues(vector<bool>{adders[3].getOutput(1)->getOutput()});
+            output4.changeValues(vector<bool>{adder3.getOutput(1)->getOutput()});
         }
 
         Adder4Bit(Circuit * inputA_0,
@@ -304,7 +303,7 @@ int main() {
     Circuit sys_input3(yes_Gate, vector<bool>{1});
 
     Circuit sys_input4(yes_Gate, vector<bool>{0});
-    Circuit sys_input5(yes_Gate, vector<bool>{0});
+    Circuit sys_input5(yes_Gate, vector<bool>{1});
     Circuit sys_input6(yes_Gate, vector<bool>{1});
     Circuit sys_input7(yes_Gate, vector<bool>{1});
 
