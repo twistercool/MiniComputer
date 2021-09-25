@@ -39,7 +39,7 @@ LogicGate yes_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1}, 1}, {v
 
 LogicGate not_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1}, 0}, {vector<bool>{0}, 1}}));
 
-LogicGate and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 0}, {vector<bool>{0, 1}, 0}, {vector<bool>{0, 0}, 0}}));
+LogicGate and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}}));
 
 LogicGate or_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
 
@@ -50,6 +50,9 @@ LogicGate nor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0},
 LogicGate nand_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 1}}));
 
 LogicGate xnor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
+
+LogicGate triple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1}, 1}})); //maps default to 0 if the value is not found
+
 
 class Circuit {
     private:
@@ -295,6 +298,56 @@ class Adder4Bit {
         }
 };
 
+class APU_Emulator {
+    private:
+        Circuit inputS0;
+        Circuit inputS1;
+        Circuit inputS2;
+        Circuit inputS3;
+
+        Circuit inputA0;
+        Circuit inputA1;
+        Circuit inputA2;
+        Circuit inputA3;
+
+        Circuit inputB0;
+        Circuit inputB1;
+        Circuit inputB2;
+        Circuit inputB3;
+
+        Circuit inputM;
+        Circuit inputC;
+        //first row of NOT gates: starts from the "bottom" aka next to the C and M inputs on the ALU blueprint 
+        Circuit notGateRow0_0 = Circuit(not_Gate, vector<Circuit*>{&inputM});
+        Circuit notGateRow0_1 = Circuit(not_Gate, vector<Circuit*>{&inputB0});
+        Circuit notGateRow0_2 = Circuit(not_Gate, vector<Circuit*>{&inputB1});
+        Circuit notGateRow0_3 = Circuit(not_Gate, vector<Circuit*>{&inputB2});
+        Circuit notGateRow0_4 = Circuit(not_Gate, vector<Circuit*>{&inputB3});
+
+        //second row: and gates
+        Circuit andGateRow1_0 = Circuit(and_Gate, vector<Circuit*>{&inputA0, &inputS0});
+        Circuit andGateRow1_1 = Circuit(and_Gate, vector<Circuit*>{&inputS1, &notGateRow0_1});
+        Circuit andGateRow1_2 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_1, &inputS2, &inputA0});
+        Circuit andGateRow1_3 = Circuit(triple_and_Gate, vector<Circuit*>{&inputA0, &inputS3, &inputB0});
+
+        Circuit andGateRow1_4 = Circuit(and_Gate, vector<Circuit*>{&inputB1, &inputS0});
+        Circuit andGateRow1_5 = Circuit(and_Gate, vector<Circuit*>{&inputS1, &notGateRow0_2});
+        Circuit andGateRow1_6 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_2, &inputS2, &inputA1});
+        Circuit andGateRow1_7 = Circuit(triple_and_Gate, vector<Circuit*>{&inputA1, &inputS3, &inputB1});
+
+        Circuit andGateRow1_8 = Circuit(and_Gate, vector<Circuit*>{&inputB2, &inputS0});
+        Circuit andGateRow1_9 = Circuit(and_Gate, vector<Circuit*>{&inputS1, &notGateRow0_3});
+        Circuit andGateRow1_10 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_3, &inputS2, &inputA2});
+        Circuit andGateRow1_11 = Circuit(triple_and_Gate, vector<Circuit*>{&inputA2, &inputS3, &inputB2});
+
+        Circuit andGateRow1_12 = Circuit(and_Gate, vector<Circuit*>{&inputB3, &inputS0});
+        Circuit andGateRow1_13 = Circuit(and_Gate, vector<Circuit*>{&inputS1, &notGateRow0_4});
+        Circuit andGateRow1_14 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_4, &inputS2, &inputA3});
+        Circuit andGateRow1_15 = Circuit(triple_and_Gate, vector<Circuit*>{&inputA3, &inputS3, &inputB3});
+
+
+};
+
 int main() {
     //System inputs
     Circuit sys_input0(yes_Gate, vector<bool>{0});
@@ -305,7 +358,7 @@ int main() {
     Circuit sys_input4(yes_Gate, vector<bool>{0});
     Circuit sys_input5(yes_Gate, vector<bool>{1});
     Circuit sys_input6(yes_Gate, vector<bool>{1});
-    Circuit sys_input7(yes_Gate, vector<bool>{1});
+    Circuit sys_input7(yes_Gate, vector<bool>{0});
 
     Circuit sys_input8(yes_Gate, vector<bool>{0});
 
