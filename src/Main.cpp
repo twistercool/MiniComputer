@@ -53,6 +53,9 @@ LogicGate xnor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}
 
 LogicGate triple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1}, 1}})); //maps default to 0 if the value is not found
 
+LogicGate quad_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
+
+
 LogicGate triple_nor_gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0}, 1}}));
 
 
@@ -359,6 +362,17 @@ class APU_Emulator {
         Circuit norGateRow2_7 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_14, &andGateRow1_15});
 
         //fourth row: 
+        Circuit nandGateRow3_0 = Circuit(nand_Gate, vector<Circuit*>{&inputC, &notGateRow0_0});
+        Circuit xorGateRow3_1 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_0, &norGateRow2_1});
+        Circuit andGateRow3_2 = Circuit(and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_0});
+        Circuit andGateRow3_3 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_1, &inputC});
+        Circuit xorGateRow3_4 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_2, &norGateRow2_3});
+        Circuit andGateRow3_5 = Circuit(and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_2});
+        Circuit andGateRow3_6 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_0, &norGateRow2_3});
+        Circuit andGateRow3_7 = Circuit(quad_and_Gate, vector<Circuit*>{&notGateRow0_0, &inputC, &norGateRow2_1, &norGateRow2_3});
+        Circuit xorGateRow3_8 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_4, &norGateRow2_5});
+
+
 
 
 };
