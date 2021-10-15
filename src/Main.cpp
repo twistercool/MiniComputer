@@ -55,9 +55,9 @@ LogicGate triple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 
 
 LogicGate quad_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
 
+LogicGate quintuple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
 
 LogicGate triple_nor_gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0}, 1}}));
-
 
 class Circuit {
     private:
@@ -322,12 +322,15 @@ class APU_Emulator {
 
         Circuit inputM;
         Circuit inputC;
+
+
         //first row of NOT gates: starts from the "bottom" aka next to the C and M inputs on the ALU blueprint 
         Circuit notGateRow0_0 = Circuit(not_Gate, vector<Circuit*>{&inputM});
         Circuit notGateRow0_1 = Circuit(not_Gate, vector<Circuit*>{&inputB0});
         Circuit notGateRow0_2 = Circuit(not_Gate, vector<Circuit*>{&inputB1});
         Circuit notGateRow0_3 = Circuit(not_Gate, vector<Circuit*>{&inputB2});
         Circuit notGateRow0_4 = Circuit(not_Gate, vector<Circuit*>{&inputB3});
+
 
         //second row: and gates
         Circuit andGateRow1_0 = Circuit(and_Gate, vector<Circuit*>{&inputA0, &inputS0});
@@ -350,6 +353,7 @@ class APU_Emulator {
         Circuit andGateRow1_14 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_4, &inputS2, &inputA3});
         Circuit andGateRow1_15 = Circuit(triple_and_Gate, vector<Circuit*>{&inputA3, &inputS3, &inputB3});
 
+
         //third row: nor gates
         Circuit norGateRow2_0 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA0, &andGateRow1_0, &andGateRow1_1});
         Circuit norGateRow2_1 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_2, &andGateRow1_3});
@@ -361,6 +365,7 @@ class APU_Emulator {
         Circuit norGateRow2_6 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA3, &andGateRow1_12, &andGateRow1_13});
         Circuit norGateRow2_7 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_14, &andGateRow1_15});
 
+
         //fourth row: 
         Circuit nandGateRow3_0 = Circuit(nand_Gate, vector<Circuit*>{&inputC, &notGateRow0_0});
         Circuit xorGateRow3_1 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_0, &norGateRow2_1});
@@ -371,7 +376,22 @@ class APU_Emulator {
         Circuit andGateRow3_6 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_0, &norGateRow2_3});
         Circuit andGateRow3_7 = Circuit(quad_and_Gate, vector<Circuit*>{&notGateRow0_0, &inputC, &norGateRow2_1, &norGateRow2_3});
         Circuit xorGateRow3_8 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_4, &norGateRow2_5});
+        Circuit andGateRow3_9 = Circuit(and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_4});
+        Circuit andGateRow3_10 = Circuit(triple_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_2, &norGateRow2_5});
+        Circuit andGateRow3_11 = Circuit(quad_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_0, &norGateRow2_3, &norGateRow2_5});
+        Circuit andGateRow3_12 = Circuit(quintuple_and_Gate, vector<Circuit*>{&notGateRow0_0, &inputC, &norGateRow2_1, &norGateRow2_3, &norGateRow2_5});
+        Circuit xorGateRow3_13 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_6, &norGateRow2_7});
+        Circuit andGateRow3_14_0 = Circuit(quad_and_Gate, vector<Circuit*>{&norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
+        Circuit andGateRow3_14_output = Circuit(not_Gate, vector<Circuit*>{&andGateRow3_14_0});
+        Circuit andGateRow3_15_0 = Circuit(quintuple_and_Gate, vector<Circuit*>{&inputC, &norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
+        Circuit andGateRow3_15_output = Circuit(not_Gate, vector<Circuit*>{&andGateRow3_15_0});
+        Circuit andGateRow3_16 = Circuit(quad_and_Gate, vector<Circuit*>{&norGateRow2_0, &norGateRow2_3, &norGateRow2_2, &norGateRow2_7});
+        Circuit andGateRow3_17 = Circuit(triple_and_Gate, vector<Circuit*>{&norGateRow2_2, &norGateRow2_5, &norGateRow2_7});
+        Circuit andGateRow3_18 = Circuit(and_Gate, vector<Circuit*>{&norGateRow2_4, &norGateRow2_7});
 
+
+        //fifth row:
+        
 
 
 
