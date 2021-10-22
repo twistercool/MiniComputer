@@ -57,7 +57,9 @@ LogicGate quad_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1,
 
 LogicGate quintuple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
 
-LogicGate triple_nor_gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0}, 1}}));
+LogicGate triple_nor_Gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0}, 1}}));
+
+LogicGate quad_nor_Gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0, 0}, 1}}));
 
 class Circuit {
     private:
@@ -355,14 +357,14 @@ class APU_Emulator {
 
 
         //third row: nor gates
-        Circuit norGateRow2_0 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA0, &andGateRow1_0, &andGateRow1_1});
+        Circuit norGateRow2_0 = Circuit(triple_nor_Gate, vector<Circuit*>{&inputA0, &andGateRow1_0, &andGateRow1_1});
         Circuit norGateRow2_1 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_2, &andGateRow1_3});
-        Circuit norGateRow2_2 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA1, &andGateRow1_4, &andGateRow1_5});
+        Circuit norGateRow2_2 = Circuit(triple_nor_Gate, vector<Circuit*>{&inputA1, &andGateRow1_4, &andGateRow1_5});
         Circuit norGateRow2_3 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_6, &andGateRow1_7});
 
-        Circuit norGateRow2_4 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA2, &andGateRow1_8, &andGateRow1_9});
+        Circuit norGateRow2_4 = Circuit(triple_nor_Gate, vector<Circuit*>{&inputA2, &andGateRow1_8, &andGateRow1_9});
         Circuit norGateRow2_5 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_10, &andGateRow1_11});
-        Circuit norGateRow2_6 = Circuit(triple_nor_gate, vector<Circuit*>{&inputA3, &andGateRow1_12, &andGateRow1_13});
+        Circuit norGateRow2_6 = Circuit(triple_nor_Gate, vector<Circuit*>{&inputA3, &andGateRow1_12, &andGateRow1_13});
         Circuit norGateRow2_7 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow1_14, &andGateRow1_15});
 
 
@@ -381,18 +383,73 @@ class APU_Emulator {
         Circuit andGateRow3_11 = Circuit(quad_and_Gate, vector<Circuit*>{&notGateRow0_0, &norGateRow2_0, &norGateRow2_3, &norGateRow2_5});
         Circuit andGateRow3_12 = Circuit(quintuple_and_Gate, vector<Circuit*>{&notGateRow0_0, &inputC, &norGateRow2_1, &norGateRow2_3, &norGateRow2_5});
         Circuit xorGateRow3_13 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow2_6, &norGateRow2_7});
-        Circuit andGateRow3_14_0 = Circuit(quad_and_Gate, vector<Circuit*>{&norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
-        Circuit andGateRow3_14_output = Circuit(not_Gate, vector<Circuit*>{&andGateRow3_14_0});
-        Circuit andGateRow3_15_0 = Circuit(quintuple_and_Gate, vector<Circuit*>{&inputC, &norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
-        Circuit andGateRow3_15_output = Circuit(not_Gate, vector<Circuit*>{&andGateRow3_15_0});
+        Circuit nandGateRow3_14_0 = Circuit(quad_and_Gate, vector<Circuit*>{&norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
+        Circuit nandGateRow3_14_output = Circuit(not_Gate, vector<Circuit*>{&nandGateRow3_14_0});
+        Circuit nandGateRow3_15_0 = Circuit(quintuple_and_Gate, vector<Circuit*>{&inputC, &norGateRow2_1, &norGateRow2_3, &norGateRow2_5, &norGateRow2_7});
+        Circuit nandGateRow3_15_output = Circuit(not_Gate, vector<Circuit*>{&nandGateRow3_15_0});
         Circuit andGateRow3_16 = Circuit(quad_and_Gate, vector<Circuit*>{&norGateRow2_0, &norGateRow2_3, &norGateRow2_2, &norGateRow2_7});
         Circuit andGateRow3_17 = Circuit(triple_and_Gate, vector<Circuit*>{&norGateRow2_2, &norGateRow2_5, &norGateRow2_7});
         Circuit andGateRow3_18 = Circuit(and_Gate, vector<Circuit*>{&norGateRow2_4, &norGateRow2_7});
 
 
         //fifth row:
+        Circuit norGateRow4_0 = Circuit(nor_Gate, vector<Circuit*>{&andGateRow3_2, &andGateRow3_3});
+        Circuit norGateRow4_1 = Circuit(triple_nor_Gate, vector<Circuit*>{&andGateRow3_5, &andGateRow3_6, &andGateRow3_7});
+        Circuit norGateRow4_2 = Circuit(quad_nor_Gate, vector<Circuit*>{&andGateRow3_9, &andGateRow3_10, &andGateRow3_11, &andGateRow3_12});
+        Circuit norGateRow4_3 = Circuit(quad_nor_Gate, vector<Circuit*>{&andGateRow3_16, &andGateRow3_17, &andGateRow3_18, &norGateRow2_6});
         
+        //sixth row:
+        Circuit xorGateRow5_0 = Circuit(xor_Gate, vector<Circuit*>{&nandGateRow3_0, &xorGateRow3_1});
+        Circuit xorGateRow5_1 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow4_0, &xorGateRow3_4});
+        Circuit xorGateRow5_2 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow4_1, &xorGateRow3_8});
+        Circuit xorGateRow5_3 = Circuit(xor_Gate, vector<Circuit*>{&norGateRow4_2, &xorGateRow3_13});
+        Circuit notGateRow5_4_input_0 = Circuit(not_Gate, vector<Circuit*>{&nandGateRow3_14_output});
+        Circuit notGateRow5_4_input_1 = Circuit(not_Gate, vector<Circuit*>{&norGateRow4_3});
+        Circuit orGateRow5_4 = Circuit(or_Gate, vector<Circuit*>{&notGateRow5_4_input_0, &notGateRow5_4_input_1});
 
+        //seventh row:
+        Circuit andGateRow6_0 = Circuit(quad_and_Gate, vector<Circuit*>{&xorGateRow5_0, &xorGateRow5_1, &xorGateRow5_2, &xorGateRow5_3});
+
+        //outputs
+        Circuit output_F_0 = Circuit(yes_Gate, vector<Circuit*>{&xorGateRow5_0});
+        Circuit output_F_1 = Circuit(yes_Gate, vector<Circuit*>{&xorGateRow5_1});
+        Circuit output_A_equal_B = Circuit(yes_Gate, vector<Circuit*>{&andGateRow6_0});
+        Circuit output_F_2 = Circuit(yes_Gate, vector<Circuit*>{&xorGateRow5_2});
+        Circuit output_F_3 = Circuit(yes_Gate, vector<Circuit*>{&xorGateRow5_3});
+
+        Circuit output_P = Circuit(yes_Gate, vector<Circuit*>{&nandGateRow3_14_output});
+        Circuit output_C_n_plus_4 = Circuit(yes_Gate, vector<Circuit*>{&orGateRow5_4});
+        Circuit output_G = Circuit(yes_Gate, vector<Circuit*>{&norGateRow4_3});
+
+    public:
+        void computeOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C) {
+            inputA0.changeValues(vector<bool>{(bool)((int)inputA[0] - 48)});
+            inputA1.changeValues(vector<bool>{(bool)((int)inputA[1] - 48)});
+            inputA2.changeValues(vector<bool>{(bool)((int)inputA[2] - 48)});
+            inputA3.changeValues(vector<bool>{(bool)((int)inputA[3] - 48)});
+            
+            inputB0.changeValues(vector<bool>{(bool)((int)inputB[0] - 48)});            
+            inputB1.changeValues(vector<bool>{(bool)((int)inputB[1] - 48)});
+            inputB2.changeValues(vector<bool>{(bool)((int)inputB[2] - 48)});
+            inputB3.changeValues(vector<bool>{(bool)((int)inputB[3] - 48)});
+            
+            inputS0.changeValues(vector<bool>{(bool)((int)inputS[0] - 48)});            
+            inputS1.changeValues(vector<bool>{(bool)((int)inputS[1] - 48)});
+            inputS2.changeValues(vector<bool>{(bool)((int)inputS[2] - 48)});
+            inputS3.changeValues(vector<bool>{(bool)((int)inputS[3] - 48)});
+
+            inputM.changeValues(vector<bool>{input_M});
+            inputC.changeValues(vector<bool>{input_C});
+
+            cout << "Output F: " << output_F_0.getOutput() << output_F_1.getOutput() << output_F_2.getOutput() << output_F_3.getOutput() << endl;
+            cout << "Output A=B: " << output_A_equal_B.getOutput() << endl;
+            cout << "Output C_n+4: " << output_C_n_plus_4.getOutput() << endl;
+            cout << "Output G: " << output_G.getOutput() << endl;
+        }
+
+        APU_Emulator(string inputA, string inputB, string inputS, bool input_M, bool input_C) {
+            computeOutput(inputA, inputB, inputS, input_M, input_C);
+        }
 
 
 };
