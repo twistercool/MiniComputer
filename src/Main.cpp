@@ -4,62 +4,34 @@
 using namespace std;
 
 
-class TruthTable {
-    private:
+class LogicGate {
+    private: 
         map<vector<bool>, bool> table;
 
     public:
-        TruthTable() {}
-        TruthTable(map<vector<bool>, bool> inputTable) {
-            table = inputTable;
-        }
-
-        bool getValue(vector<bool> input) {
-            return table[input];
-        }
-};
-
-
-class LogicGate {
-    private: 
-        TruthTable table;
-
-    public:
         LogicGate() {}
-        LogicGate(TruthTable input) {
+        LogicGate(map<vector<bool>, bool> input) {
             table = input;
         }
 
         bool getOutput(vector<bool> input) {
-            return table.getValue(input);
+            return table[input];
         }
 };
 
-LogicGate yes_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1}, 1}, {vector<bool>{0}, 0}}));
-
-LogicGate not_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1}, 0}, {vector<bool>{0}, 1}}));
-
-LogicGate and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}}));
-
-LogicGate or_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
-
-LogicGate xor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
-
-LogicGate nor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{0, 0}, 1}}));
-
-LogicGate nand_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 0}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 1}}));
-
-LogicGate xnor_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1}, 1}, {vector<bool>{1, 0}, 1}, {vector<bool>{0, 1}, 1}, {vector<bool>{0, 0}, 0}}));
-
-LogicGate triple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1}, 1}})); //maps default to 0 if the value is not found
-
-LogicGate quad_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
-
-LogicGate quintuple_and_Gate(TruthTable (map<vector<bool>, bool> {{vector<bool>{1, 1, 1, 1, 1}, 1}})); //maps default to 0 if the value is not found
-
-LogicGate triple_nor_Gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0}, 1}}));
-
-LogicGate quad_nor_Gate(TruthTable (map<vector<bool>, bool>{{vector<bool>{0, 0, 0, 0}, 1}}));
+const LogicGate yes_Gate(map<vector<bool>, bool> {{{1}, 1}});
+const LogicGate not_Gate(map<vector<bool>, bool> {{{0}, 1}});
+const LogicGate and_Gate(map<vector<bool>, bool> {{{1, 1}, 1}});
+const LogicGate or_Gate(map<vector<bool>, bool> {{{1, 1}, 1}, {{1, 0}, 1}, {{0, 1}, 1}});
+const LogicGate xor_Gate(map<vector<bool>, bool> {{{1, 0}, 1}, {{0, 1}, 1}});
+const LogicGate nor_Gate(map<vector<bool>, bool> {{{0, 0}, 1}});
+const LogicGate nand_Gate(map<vector<bool>, bool> {{{1, 0}, 1}, {{0, 1}, 1}, {{0, 0}, 1}});
+const LogicGate xnor_Gate(map<vector<bool>, bool> {{{1, 1}, 1}, {{1, 0}, 1}, {{0, 1}, 1}});
+const LogicGate triple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1}, 1}}); //maps default to 0 if the value is not found
+const LogicGate quad_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1}, 1}}); //maps default to 0 if the value is not found
+const LogicGate quintuple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1, 1}, 1}}); //maps default to 0 if the value is not found
+const LogicGate triple_nor_Gate(map<vector<bool>, bool>{{{0, 0, 0}, 1}});
+const LogicGate quad_nor_Gate(map<vector<bool>, bool>{{{0, 0, 0, 0}, 1}});
 
 class Circuit {
     private:
@@ -94,50 +66,6 @@ class Circuit {
             staticValues = inputValues;
         }
 };
-
-
-// The first circuits have to be inputs
-// The last circuits have to be outputs
-class CompoundCircuit {
-    private:
-        int nbInputs;
-        int nbOutputs;
-
-    public:
-        vector<Circuit*> components;
-
-        CompoundCircuit(int inputs, int outputs, vector<Circuit*> inputComponents) {
-            nbInputs = inputs;
-            nbOutputs = outputs;
-            components = inputComponents;
-        }
-
-        vector<bool> getOutput(vector<bool> input) {
-            for (int i = 0; i < input.size(); i++) {
-                (*components[i]).changeValues(vector<bool>{input[i]});
-            }
-
-            vector<bool> output;
-            for (int i = components.size() - nbOutputs; i < components.size(); i++) {
-                Circuit component = *components[i];
-                output.push_back(component.getOutput());
-            }
-            return output;
-        }
-
-        void printOutput(vector<bool> input) {
-            vector<bool> output = CompoundCircuit::getOutput(input);
-            for (auto out:output) {
-                cout << out << " ";
-            }
-            cout << endl;
-        }
-
-        Circuit * getOutput(int nb) {
-            return components[components.size() - nbOutputs + nb];
-        }
-};
-
 
 // Takes 3 bits as inputs, 2 bits to sum up and a carry bit
 // It outputs 2 bits, the sum and a carry signal.
@@ -305,25 +233,39 @@ class Adder4Bit {
         }
 };
 
+/*
+This class emulates the inner workings of the 74181 ALU.
+It takes 3 4-bit numbers and 2 bit signals, M and C.
+
+C is the carry bit.
+
+M is the bit which chooses between logic and arithmetic operations (1 => logic, 0 => arithmetic)
+
+The first two 4-bit inputs are A and B, which represent unsigned integers.
+
+The third 4-bit input, S, specifies the operation. 
+
+
+*/
 class APU_Emulator {
     private:
-        Circuit inputS0;
-        Circuit inputS1;
-        Circuit inputS2;
-        Circuit inputS3;
+        Circuit inputS0 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputS1 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputS2 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputS3 = Circuit(yes_Gate, vector<bool>{0});
 
-        Circuit inputA0;
-        Circuit inputA1;
-        Circuit inputA2;
-        Circuit inputA3;
+        Circuit inputA0 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputA1 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputA2 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputA3 = Circuit(yes_Gate, vector<bool>{0});
 
-        Circuit inputB0;
-        Circuit inputB1;
-        Circuit inputB2;
-        Circuit inputB3;
+        Circuit inputB0 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputB1 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputB2 = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputB3 = Circuit(yes_Gate, vector<bool>{0});
 
-        Circuit inputM;
-        Circuit inputC;
+        Circuit inputM = Circuit(yes_Gate, vector<bool>{0});
+        Circuit inputC = Circuit(yes_Gate, vector<bool>{0});
 
 
         //first row of NOT gates: starts from the "bottom" aka next to the C and M inputs on the ALU blueprint 
@@ -422,7 +364,9 @@ class APU_Emulator {
         Circuit output_G = Circuit(yes_Gate, vector<Circuit*>{&norGateRow4_3});
 
     public:
-        void computeOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C) {
+        APU_Emulator() {}
+        
+        void computeOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C = 0) {
             inputA0.changeValues(vector<bool>{(bool)((int)inputA[0] - 48)});
             inputA1.changeValues(vector<bool>{(bool)((int)inputA[1] - 48)});
             inputA2.changeValues(vector<bool>{(bool)((int)inputA[2] - 48)});
@@ -440,36 +384,24 @@ class APU_Emulator {
 
             inputM.changeValues(vector<bool>{input_M});
             inputC.changeValues(vector<bool>{input_C});
+        }
 
+        void printOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C = 0) {
+            computeOutput(inputA, inputB, inputS, input_M, input_C);
             cout << "Output F: " << output_F_0.getOutput() << output_F_1.getOutput() << output_F_2.getOutput() << output_F_3.getOutput() << endl;
             cout << "Output A=B: " << output_A_equal_B.getOutput() << endl;
             cout << "Output C_n+4: " << output_C_n_plus_4.getOutput() << endl;
             cout << "Output G: " << output_G.getOutput() << endl;
+            cout << "Output P: " << output_P.getOutput() << endl;
         }
 
-        APU_Emulator(string inputA, string inputB, string inputS, bool input_M, bool input_C) {
-            computeOutput(inputA, inputB, inputS, input_M, input_C);
-        }
+        
 
 
 };
 
-int main() {
-    //System inputs
-    Circuit sys_input0(yes_Gate, vector<bool>{0});
-    Circuit sys_input1(yes_Gate, vector<bool>{1});
-    Circuit sys_input2(yes_Gate, vector<bool>{1});
-    Circuit sys_input3(yes_Gate, vector<bool>{1});
-
-    Circuit sys_input4(yes_Gate, vector<bool>{0});
-    Circuit sys_input5(yes_Gate, vector<bool>{1});
-    Circuit sys_input6(yes_Gate, vector<bool>{1});
-    Circuit sys_input7(yes_Gate, vector<bool>{0});
-
-    Circuit sys_input8(yes_Gate, vector<bool>{0});
-
-    Adder4Bit bigAdder(&sys_input0, &sys_input1, &sys_input2, &sys_input3, &sys_input4, &sys_input5, &sys_input6, &sys_input7, &sys_input8);
-
-    bigAdder.printResults();
- 
+int main(int argc, char * argv[]) {
+    APU_Emulator emu;
+    emu.printOutput("1111", "1011", "1010", 0, 0);
+    
 }
