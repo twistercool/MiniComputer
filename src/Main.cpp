@@ -27,9 +27,9 @@ const LogicGate xor_Gate(map<vector<bool>, bool> {{{1, 0}, 1}, {{0, 1}, 1}});
 const LogicGate nor_Gate(map<vector<bool>, bool> {{{0, 0}, 1}});
 const LogicGate nand_Gate(map<vector<bool>, bool> {{{1, 0}, 1}, {{0, 1}, 1}, {{0, 0}, 1}});
 const LogicGate xnor_Gate(map<vector<bool>, bool> {{{1, 1}, 1}, {{1, 0}, 1}, {{0, 1}, 1}});
-const LogicGate triple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1}, 1}}); //maps default to 0 if the value is not found
-const LogicGate quad_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1}, 1}}); //maps default to 0 if the value is not found
-const LogicGate quintuple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1, 1}, 1}}); //maps default to 0 if the value is not found
+const LogicGate triple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1}, 1}});
+const LogicGate quad_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1}, 1}});
+const LogicGate quintuple_and_Gate(map<vector<bool>, bool> {{{1, 1, 1, 1, 1}, 1}});
 const LogicGate triple_nor_Gate(map<vector<bool>, bool>{{{0, 0, 0}, 1}});
 const LogicGate quad_nor_Gate(map<vector<bool>, bool>{{{0, 0, 0, 0}, 1}});
 
