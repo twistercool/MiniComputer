@@ -1,4 +1,4 @@
 cd ./build
 cmake .. 
-cmake --build
+cmake --build .
 ./MiniComputer
