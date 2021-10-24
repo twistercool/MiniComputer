@@ -367,23 +367,23 @@ class APU_Emulator {
         APU_Emulator() {}
         
         void computeOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C = 0) {
-            inputA0.changeValues(vector<bool>{(bool)((int)inputA[0] - 48)});
-            inputA1.changeValues(vector<bool>{(bool)((int)inputA[1] - 48)});
-            inputA2.changeValues(vector<bool>{(bool)((int)inputA[2] - 48)});
-            inputA3.changeValues(vector<bool>{(bool)((int)inputA[3] - 48)});
+            inputA0.changeValues({(bool) (inputA[0] - '0')});
+            inputA1.changeValues({(bool) (inputA[1] - '0')});
+            inputA2.changeValues({(bool) (inputA[2] - '0')});
+            inputA3.changeValues({(bool) (inputA[3] - '0')});
             
-            inputB0.changeValues(vector<bool>{(bool)((int)inputB[0] - 48)});            
-            inputB1.changeValues(vector<bool>{(bool)((int)inputB[1] - 48)});
-            inputB2.changeValues(vector<bool>{(bool)((int)inputB[2] - 48)});
-            inputB3.changeValues(vector<bool>{(bool)((int)inputB[3] - 48)});
+            inputB0.changeValues({(bool) (inputB[0] - '0')});            
+            inputB1.changeValues({(bool) (inputB[1] - '0')});
+            inputB2.changeValues({(bool) (inputB[2] - '0')});
+            inputB3.changeValues({(bool) (inputB[3] - '0')});
             
-            inputS0.changeValues(vector<bool>{(bool)((int)inputS[0] - 48)});            
-            inputS1.changeValues(vector<bool>{(bool)((int)inputS[1] - 48)});
-            inputS2.changeValues(vector<bool>{(bool)((int)inputS[2] - 48)});
-            inputS3.changeValues(vector<bool>{(bool)((int)inputS[3] - 48)});
+            inputS0.changeValues({(bool) (inputS[0] - '0')});         
+            inputS1.changeValues({(bool) (inputS[1] - '0')});
+            inputS2.changeValues({(bool) (inputS[2] - '0')});
+            inputS3.changeValues({(bool) (inputS[3] - '0')});
 
-            inputM.changeValues(vector<bool>{input_M});
-            inputC.changeValues(vector<bool>{input_C});
+            inputM.changeValues({input_M});
+            inputC.changeValues({input_C});
         }
 
         void printOutput(string inputA, string inputB, string inputS, bool input_M, bool input_C = 0) {
